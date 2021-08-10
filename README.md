@@ -46,3 +46,9 @@
 ## 项目启动
 
 go run main.go
+
+## MYSQL表说明
+
+- articles 文章表
+- tags 标签表
+- article_tag_refs 文章标签关联表(一个文章可以关联多个标签)

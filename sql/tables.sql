@@ -21,8 +21,6 @@ CREATE TABLE `todo`.`tags` (
     id                   INT               NOT NULL AUTO_INCREMENT,
     name                 VARCHAR(255)      NOT NULL COMMENT '名称',
     description          VARCHAR(255)      NOT NULL COMMENT '描述',
-    created_time         INT               NOT NULL,
-    updated_time         INT               NOT NULL,
     PRIMARY KEY (id),
     INDEX (name)
 ) ENGINE = InnoDB CHARACTER SET utf8 COLLATE utf8_general_ci COMMENT '标签表';
