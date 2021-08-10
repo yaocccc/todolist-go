@@ -25,13 +25,10 @@ type ArticleCondition struct {
 	Types       []int
 	Statuses    []int
 	CreatedTime []int
-	IsDeleted   []int
+	IsDeleteds  []int
 }
 
-func makeQuery(
-	condition ArticleCondition,
-	keyword string,
-) *gorm.DB {
+func makeArticleQuery(condition ArticleCondition, keyword string) *gorm.DB {
 	query := db
 	if condition.Ids != nil {
 		query = query.Where("id IN (?)", condition.Ids)
@@ -45,8 +42,10 @@ func makeQuery(
 	if condition.CreatedTime != nil {
 		query = query.Where("created_time > (?) and created_time <= (?)", condition.CreatedTime[0], condition.CreatedTime[1])
 	}
-	if condition.IsDeleted != nil {
-		query = query.Where("is_deleted IN (?)", condition.IsDeleted)
+	if condition.IsDeleteds != nil {
+		query = query.Where("is_deleted IN (?)", condition.IsDeleteds)
+	} else {
+		query = query.Where("is_deleted = 0")
 	}
 	if keyword != "" {
 		query = query.Where("title LIKE ?", "%"+keyword+"%")
@@ -55,7 +54,7 @@ func makeQuery(
 }
 
 func GetArticles(condition ArticleCondition, keyword string, p *pagination.Pagination) (articles []Article, count int64) {
-	query := makeQuery(condition, keyword)
+	query := makeArticleQuery(condition, keyword)
 	if p != nil {
 		query = query.Limit(p.Limit).Offset(p.Offset).Order(fmt.Sprintf("%s %s", p.OrderBy, p.OrderDir.String()))
 	}
@@ -64,24 +63,22 @@ func GetArticles(condition ArticleCondition, keyword string, p *pagination.Pagin
 }
 
 func CreateArticles(articles []*Article) {
-	db.Create(articles)
+	query := db
+	query.Create(articles)
 }
 
 func UpdateArticles(condition ArticleCondition, keyword string, updation Article) {
-	query := makeQuery(condition, keyword)
+	query := makeArticleQuery(condition, keyword)
 	query.Updates(updation)
 }
 
 func UpdateArticlesByEntities(articles []*Article) {
-	db.Save(articles)
+	query := db
+	query.Save(articles)
 }
 
-func DeleteArticles(
-	condition ArticleCondition,
-	keyword string,
-	hardDel bool,
-) {
-	query := makeQuery(condition, keyword)
+func DeleteArticles(condition ArticleCondition, keyword string, hardDel bool) {
+	query := makeArticleQuery(condition, keyword)
 	if hardDel {
 		query.Updates(Article{IsDeleted: 1})
 	} else {
