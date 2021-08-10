@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"bytes"
+	"io/ioutil"
 	"time"
 	"todo/utils"
 
@@ -14,7 +16,13 @@ func TraceLogger(c *gin.Context) {
 	c.Set("RequestUuid", uid)
 
 	method, path, clientIP := c.Request.Method, c.Request.URL, c.ClientIP()
+	var bodyBytes []byte
+	if c.Request.Body != nil {
+		bodyBytes, _ = ioutil.ReadAll(c.Request.Body)
+	}
+	c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 	utils.Logger(uid, "INFO", method, path, clientIP, "START")
+	utils.Logger(uid, "INFO", "REQ:", string(bodyBytes))
 
 	start := time.Now()
 	c.Next()
