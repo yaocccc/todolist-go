@@ -1,6 +1,7 @@
 package utils
 
-func UniqInts(array []int) (result []int) {
+func UniqInts(array []int) []int {
+	result := []int{}
 	set := make(map[int]bool)
 	for _, item := range array {
 		if _, ok := set[item]; !ok {
@@ -8,5 +9,5 @@ func UniqInts(array []int) (result []int) {
 			result = append(result, item)
 		}
 	}
-	return
+	return result
 }

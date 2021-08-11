@@ -9,19 +9,23 @@ import (
 var apimap = make(map[string]gin.HandlerFunc)
 
 func Router(r *gin.Engine) {
-	userapis := apis.UserApis{}
-	apimap["GetUsers"] = userapis.GetUsers
-	apimap["CreateUsers"] = userapis.CreateUsers
-	apimap["UpdateUsers"] = userapis.UpdateUsers
-	apimap["DeleteUsers"] = userapis.DeleteUsers
+	articleApis := apis.ArticleApis{}
+	apimap["GetArticles"] = articleApis.GetArticles
+	apimap["CreateArticle"] = articleApis.CreateArticle
+
+	// tagApis := apis.TagApis{}
+	// apimap["GetTags"] = tagApis.GetTags
+	// apimap["CreateTag"] = tagApis.CreateTag
+	// apimap["UpdateTag"] = tagApis.UpdateTag
+	// apimap["DeleteTag"] = tagApis.DeleteTag
 
 	r.POST("", func(c *gin.Context) {
 		action := c.Query("Action")
 		api, ok := apimap[action]
 		if !ok {
 			c.JSON(404, gin.H{
-				"Code":    404,
-				"Message": "Can't find action " + action,
+				"code":    404,
+				"message": "Can't find action " + action,
 			})
 			return
 		}

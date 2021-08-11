@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+type ArticleModel struct{}
+
 type Article struct {
 	Id            int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Type          int    `json:"type" gorm:"default=1"`
@@ -28,8 +30,7 @@ type ArticleCondition struct {
 	IsDeleteds  []int
 }
 
-func makeArticleQuery(condition ArticleCondition, keyword string) *gorm.DB {
-	query := db
+func makeArticleQuery(query *gorm.DB, condition ArticleCondition, keyword string) *gorm.DB {
 	if condition.Ids != nil {
 		query = query.Where("id IN (?)", condition.Ids)
 	}
@@ -53,8 +54,9 @@ func makeArticleQuery(condition ArticleCondition, keyword string) *gorm.DB {
 	return query
 }
 
-func GetArticles(condition ArticleCondition, keyword string, p *pagination.Pagination) (articles []Article, count int64) {
-	query := makeArticleQuery(condition, keyword)
+func (m ArticleModel) getArticles(condition ArticleCondition, keyword string, p *pagination.Pagination) (articles []Article, count int64) {
+	query := getTxOrDb(nil)
+	query = makeArticleQuery(query, condition, keyword)
 	if p != nil {
 		query = query.Limit(p.Limit).Offset(p.Offset).Order(fmt.Sprintf("%s %s", p.OrderBy, p.OrderDir.String()))
 	}
@@ -62,26 +64,28 @@ func GetArticles(condition ArticleCondition, keyword string, p *pagination.Pagin
 	return
 }
 
-func CreateArticles(articles []*Article) {
-	query := db
-	query.Create(articles)
+func (m ArticleModel) createArticles(articles []*Article, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	return query.Create(articles).Error
 }
 
-func UpdateArticles(condition ArticleCondition, keyword string, updation Article) {
-	query := makeArticleQuery(condition, keyword)
-	query.Updates(updation)
+func (m ArticleModel) updateArticles(condition ArticleCondition, keyword string, updation Article, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	query = makeArticleQuery(query, condition, keyword)
+	return query.Updates(updation).Error
 }
 
-func UpdateArticlesByEntities(articles []*Article) {
-	query := db
-	query.Save(articles)
+func (m ArticleModel) updateArticlesByEntities(articles []*Article, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	return query.Save(articles).Error
 }
 
-func DeleteArticles(condition ArticleCondition, keyword string, hardDel bool) {
-	query := makeArticleQuery(condition, keyword)
+func (m ArticleModel) deleteArticles(condition ArticleCondition, keyword string, hardDel bool, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	query = makeArticleQuery(query, condition, keyword)
 	if hardDel {
-		query.Updates(Article{IsDeleted: 1})
+		return query.Updates(Article{IsDeleted: 1}).Error
 	} else {
-		query.Delete(Article{})
+		return query.Delete(Article{}).Error
 	}
 }

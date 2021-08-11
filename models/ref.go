@@ -4,6 +4,8 @@ import (
 	"gorm.io/gorm"
 )
 
+type ArticleTagRefModel struct{}
+
 type ArticleTagRef struct {
 	Id        int `json:"id" gorm:"primaryKey;autoIncrement"`
 	ArticleId int `json:"article_id" gorm:"default=0"`
@@ -16,8 +18,7 @@ type ArticleTagRefCondition struct {
 	TagIds     []int
 }
 
-func makeArticleTagRefQuery(condition ArticleTagRefCondition) *gorm.DB {
-	query := db
+func makeArticleTagRefQuery(query *gorm.DB, condition ArticleTagRefCondition) *gorm.DB {
 	if condition.Ids != nil {
 		query = query.Where("id IN (?)", condition.Ids)
 	}
@@ -30,18 +31,20 @@ func makeArticleTagRefQuery(condition ArticleTagRefCondition) *gorm.DB {
 	return query
 }
 
-func GetArticleTagRefs(condition ArticleTagRefCondition) (article_tag_refs []ArticleTagRef, count int64) {
-	query := makeArticleTagRefQuery(condition)
-	query.Find(&article_tag_refs).Count(&count)
+func (m ArticleTagRefModel) getArticleTagRefs(condition ArticleTagRefCondition) (article_tag_refs []ArticleTagRef) {
+	query := getTxOrDb(nil)
+	query = makeArticleTagRefQuery(query, condition)
+	query.Find(&article_tag_refs)
 	return
 }
 
-func CreateArticleTagRefs(article_tag_refs []*ArticleTagRef) {
-	query := db
-	query.Create(article_tag_refs)
+func (m ArticleTagRefModel) createArticleTagRefs(article_tag_refs []*ArticleTagRef, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	return query.Create(article_tag_refs).Error
 }
 
-func DeleteArticleTagRefs(condition ArticleTagRefCondition) {
-	query := makeArticleTagRefQuery(condition)
-	query.Delete(ArticleTagRef{})
+func (m ArticleTagRefModel) deleteArticleTagRefs(condition ArticleTagRefCondition, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	query = makeArticleTagRefQuery(query, condition)
+	return query.Delete(ArticleTagRef{}).Error
 }

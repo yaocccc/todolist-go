@@ -7,6 +7,8 @@ import (
 	"gorm.io/gorm"
 )
 
+type TagModel struct{}
+
 type Tag struct {
 	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name        string `json:"name" gorm:"default=''"`
@@ -17,8 +19,7 @@ type TagCondition struct {
 	Ids []int
 }
 
-func makeTagQuery(condition TagCondition, keyword string) *gorm.DB {
-	query := db
+func makeTagQuery(query *gorm.DB, condition TagCondition, keyword string) *gorm.DB {
 	if condition.Ids != nil {
 		query = query.Where("id IN (?)", condition.Ids)
 	}
@@ -28,8 +29,9 @@ func makeTagQuery(condition TagCondition, keyword string) *gorm.DB {
 	return query
 }
 
-func GetTags(condition TagCondition, keyword string, p *pagination.Pagination) (tags []Tag, count int64) {
-	query := makeTagQuery(condition, keyword)
+func (m TagModel) getTags(condition TagCondition, keyword string, p *pagination.Pagination) (tags []Tag, count int64) {
+	query := getTxOrDb(nil)
+	query = makeTagQuery(query, condition, keyword)
 	if p != nil {
 		query = query.Limit(p.Limit).Offset(p.Offset).Order(fmt.Sprintf("%s %s", p.OrderBy, p.OrderDir.String()))
 	}
@@ -37,22 +39,24 @@ func GetTags(condition TagCondition, keyword string, p *pagination.Pagination) (
 	return
 }
 
-func CreateTags(tags []*Tag) {
-	query := db
-	query.Create(tags)
+func (m TagModel) createTags(tags []*Tag, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	return query.Create(tags).Error
 }
 
-func UpdateTags(condition TagCondition, keyword string, updation Tag) {
-	query := makeTagQuery(condition, keyword)
-	query.Updates(updation)
+func (m TagModel) updateTags(condition TagCondition, keyword string, updation Tag, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	query = makeTagQuery(query, condition, keyword)
+	return query.Updates(updation).Error
 }
 
-func UpdateTagsByEntities(tags []*Tag) {
-	query := db
-	query.Save(tags)
+func (m TagModel) updateTagsByEntities(tags []*Tag, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	return query.Save(tags).Error
 }
 
-func DeleteTags(condition TagCondition, keyword string) {
-	query := makeTagQuery(condition, keyword)
-	query.Delete(Tag{})
+func (m TagModel) deleteTags(condition TagCondition, keyword string, tx *gorm.DB) error {
+	query := getTxOrDb(tx)
+	query = makeTagQuery(query, condition, keyword)
+	return query.Delete(Tag{}).Error
 }
