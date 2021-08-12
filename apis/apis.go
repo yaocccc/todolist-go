@@ -22,8 +22,8 @@ func (a *Api) MakeBody(body interface{}) error {
 	err := c.BindJSON(&body)
 	if err != nil {
 		a.Error(err)
-		c.JSON(404, gin.H{
-			"code":    406,
+		c.JSON(400, gin.H{
+			"code":    400,
 			"message": err.Error(),
 		})
 		return err

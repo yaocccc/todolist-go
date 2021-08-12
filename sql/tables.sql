@@ -2,7 +2,7 @@ create database todo;
 
 CREATE TABLE `todo`.`articles` (
     id                   INT               NOT NULL AUTO_INCREMENT,
-    type                 INT               DEFAULT 1 COMMENT '用户类型 1普通文本 1代办事项',
+    type                 INT               DEFAULT 1 COMMENT '用户类型 1普通文本 2代办事项',
     title                VARCHAR(1000)     NOT NULL COMMENT '标题',
     content              TEXT              NOT NULL COMMENT '内容',
     status               INT               NOT NULL COMMENT '状态 0未完成 1已完成',

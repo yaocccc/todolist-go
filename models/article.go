@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 	"todo/types/pagination"
 
 	"gorm.io/gorm"
@@ -65,6 +66,9 @@ func (m ArticleModel) getArticles(condition ArticleCondition, keyword string, p 
 }
 
 func (m ArticleModel) createArticles(articles []*Article, tx *gorm.DB) error {
+	if articles == nil || len(articles) == 0 {
+		return nil
+	}
 	query := getTxOrDb(tx)
 	return query.Create(articles).Error
 }
@@ -72,20 +76,24 @@ func (m ArticleModel) createArticles(articles []*Article, tx *gorm.DB) error {
 func (m ArticleModel) updateArticles(condition ArticleCondition, keyword string, updation Article, tx *gorm.DB) error {
 	query := getTxOrDb(tx)
 	query = makeArticleQuery(query, condition, keyword)
+	if updation.IsDeleted == 1 {
+		updation.DeletedTime = time.Now().Unix()
+	} else {
+		updation.DeletedTime = 0
+	}
 	return query.Updates(updation).Error
 }
 
 func (m ArticleModel) updateArticlesByEntities(articles []*Article, tx *gorm.DB) error {
+	if articles == nil || len(articles) == 0 {
+		return nil
+	}
 	query := getTxOrDb(tx)
 	return query.Save(articles).Error
 }
 
-func (m ArticleModel) deleteArticles(condition ArticleCondition, keyword string, hardDel bool, tx *gorm.DB) error {
+func (m ArticleModel) deleteArticles(condition ArticleCondition, keyword string, tx *gorm.DB) error {
 	query := getTxOrDb(tx)
 	query = makeArticleQuery(query, condition, keyword)
-	if hardDel {
-		return query.Updates(Article{IsDeleted: 1}).Error
-	} else {
-		return query.Delete(Article{}).Error
-	}
+	return query.Delete(Article{}).Error
 }

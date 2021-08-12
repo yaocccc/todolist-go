@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"fmt"
 	"todo/models"
 
 	"github.com/gin-gonic/gin"
@@ -27,16 +28,19 @@ type ResArticle struct {
 
 type CreateArticleReq struct {
 	Type    int    `json:"type" binding:"required"`
-	Status  int    `json:"status" binding:"required"`
+	Status  int    `json:"status"`
 	Title   string `json:"title" binding:"required"`
 	Content string `json:"content" binding:"required"`
 	TagIds  []int  `json:"tag_ids" binding:"required"`
 }
 
 type UpdateArticleReq struct {
-	Id          int    `json:"id" binding:"required"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Id        int    `json:"id" binding:"required"`
+	Status    int    `json:"status"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	TagIds    []int  `json:"tag_ids"`
+	IsDeleted int    `json:"is_deleted"`
 }
 
 type DeleteArticlesReq struct {
@@ -77,6 +81,7 @@ func (a *ArticleApis) GetArticles(c *gin.Context) {
 	for _, ref := range refs {
 		if tagIds, ok := tagIdsGroupByArticleId[ref.ArticleId]; ok {
 			tagIds = append(tagIds, ref.TagId)
+			tagIdsGroupByArticleId[ref.ArticleId] = tagIds
 		} else {
 			tagIdsGroupByArticleId[ref.ArticleId] = []int{ref.TagId}
 		}
@@ -135,41 +140,46 @@ func (a *ArticleApis) CreateArticle(c *gin.Context) {
 	})
 }
 
-// func (a *ArticleApis) UpdateArticle(c *gin.Context) {
-// 	a.MakeContext(c)
-// 	body := UpdateArticleReq{}
-// 	if a.MakeBody(&body) != nil {
-// 		return
-// 	}
-// 	condition := models.ArticleCondition{}
-// 	condition.Ids = []int{body.Id}
-// 	updation := models.Article{}
-// 	updation.Name = body.Name
-// 	updation.Description = body.Description
-// 	models.UpdateArticles(condition, "", updation)
-// 	c.JSON(200, gin.H{
-// 		"code":    0,
-// 		"message": "success",
-// 	})
-// }
+func (a *ArticleApis) UpdateArticle(c *gin.Context) {
+	a.MakeContext(c)
+	body := UpdateArticleReq{}
+	if a.MakeBody(&body) != nil {
+		return
+	}
+	article := models.Article{}
+	article.Id = body.Id
+	article.Title = body.Title
+	article.Content = body.Content
+	article.Status = body.Status
+	article.IsDeleted = body.IsDeleted
+	fmt.Printf("[logger-body.IsDeleted ]: %+v %+v\n", body.IsDeleted, body.IsDeleted == 0)
 
-// func (a *ArticleApis) DeleteArticle(c *gin.Context) {
-// 	a.MakeContext(c)
-// 	body := DeleteArticlesReq{}
-// 	if a.MakeBody(&body) != nil {
-// 		return
-// 	}
-// 	articleCondition := models.ArticleCondition{}
-// 	articleCondition.Ids = body.Ids
+	if err := models.UpdateArticle(article, body.TagIds); err == nil {
+		c.JSON(200, gin.H{
+			"code":    0,
+			"message": "success",
+		})
+	} else {
+		c.JSON(500, gin.H{
+			"code":    500,
+			"message": err,
+		})
+	}
+}
 
-// 	refConditon := models.ArticleArticleRefCondition{}
-// 	refConditon.ArticleIds = body.Ids
+func (a *ArticleApis) DeleteArticles(c *gin.Context) {
+	a.MakeContext(c)
+	body := DeleteArticlesReq{}
+	if a.MakeBody(&body) != nil {
+		return
+	}
+	articleCondition := models.ArticleCondition{}
+	articleCondition.Ids = body.Ids
 
-// 	models.DeleteArticles(articleCondition, "")
-// 	models.DeleteArticleArticleRefs(refConditon)
+	models.DeleteArticles(articleCondition, "")
 
-// 	c.JSON(200, gin.H{
-// 		"code":    0,
-// 		"message": "success",
-// 	})
-// }
+	c.JSON(200, gin.H{
+		"code":    0,
+		"message": "success",
+	})
+}

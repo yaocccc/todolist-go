@@ -40,6 +40,9 @@ func (m TagModel) getTags(condition TagCondition, keyword string, p *pagination.
 }
 
 func (m TagModel) createTags(tags []*Tag, tx *gorm.DB) error {
+	if tags == nil || len(tags) == 0 {
+		return nil
+	}
 	query := getTxOrDb(tx)
 	return query.Create(tags).Error
 }
@@ -51,6 +54,9 @@ func (m TagModel) updateTags(condition TagCondition, keyword string, updation Ta
 }
 
 func (m TagModel) updateTagsByEntities(tags []*Tag, tx *gorm.DB) error {
+	if tags == nil || len(tags) == 0 {
+		return nil
+	}
 	query := getTxOrDb(tx)
 	return query.Save(tags).Error
 }

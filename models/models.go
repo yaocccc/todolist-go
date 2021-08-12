@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log"
 	"todo/config"
 	"todo/types/pagination"
@@ -22,7 +21,7 @@ func Setup() {
 	if err != nil {
 		log.Fatalf("models.Setup err: %v", err)
 	}
-	fmt.Println("MYSQL: " + config.Mysql + " CONNECTED")
+	utils.Logger(" SYSTEM ", "INFO", "MYSQL: "+config.Mysql+" CONNECTED")
 }
 
 func getTxOrDb(tx *gorm.DB) *gorm.DB {
@@ -48,8 +47,8 @@ func GetArticles(condition ArticleCondition, keyword string, p *pagination.Pagin
 	return
 }
 
-func CreateArticle(article *Article, tagIds []int) {
-	db.Transaction(func(tx *gorm.DB) error {
+func CreateArticle(article *Article, tagIds []int) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		if err := articleModel.createArticles([]*Article{article}, tx); err != nil {
 			return err
 		}
@@ -66,28 +65,35 @@ func CreateArticle(article *Article, tagIds []int) {
 	})
 }
 
-func UpdateArticle(updation Article, tagIds []int) {
-	db.Transaction(func(tx *gorm.DB) error {
+func UpdateArticle(updation Article, tagIds []int) error {
+	return db.Transaction(func(tx *gorm.DB) error {
 		if err := articleModel.updateArticles(ArticleCondition{Ids: []int{updation.Id}}, "", updation, tx); err != nil {
 			return err
 		}
 		if tagIds != nil {
-			tagIdsSet := make(map[int]bool)
-			for _, tagId := range tagIds {
-				if _, ok := tagIdsSet[tagId]; !ok {
-					tagIdsSet[tagId] = true
-				}
-			}
 			refs := articleTagRefModel.getArticleTagRefs(ArticleTagRefCondition{ArticleIds: []int{updation.Id}})
+			tagIdsSet := make(map[int]bool)
+			refTagIdsSet := make(map[int]bool)
+			for _, tagId := range tagIds {
+				tagIdsSet[tagId] = true
+			}
+			for _, ref := range refs {
+				refTagIdsSet[ref.TagId] = true
+			}
+
 			toCreateRefs := []*ArticleTagRef{}
 			toDeleteRefsCondition := ArticleTagRefCondition{Ids: []int{}}
+			for _, tagId := range tagIds {
+				if _, ok := refTagIdsSet[tagId]; !ok {
+					toCreateRefs = append(toCreateRefs, &ArticleTagRef{ArticleId: updation.Id, TagId: tagId})
+				}
+			}
 			for _, ref := range refs {
 				if _, ok := tagIdsSet[ref.TagId]; !ok {
-					toCreateRefs = append(toCreateRefs, &ArticleTagRef{ArticleId: updation.Id, TagId: ref.TagId})
-				} else {
 					toDeleteRefsCondition.Ids = append(toDeleteRefsCondition.Ids, ref.Id)
 				}
 			}
+
 			if err := articleTagRefModel.createArticleTagRefs(toCreateRefs, tx); err != nil {
 				return err
 			}
@@ -99,25 +105,21 @@ func UpdateArticle(updation Article, tagIds []int) {
 	})
 }
 
-func DeleteArticles(condition ArticleCondition, keyword string, hardDel bool) {
-	if hardDel {
-		articles, _ := articleModel.getArticles(condition, keyword, nil)
-		articleIds := []int{}
-		for _, article := range articles {
-			articleIds = append(articleIds, article.Id)
-		}
-		db.Transaction(func(tx *gorm.DB) error {
-			if err := articleModel.deleteArticles(condition, keyword, hardDel, tx); err != nil {
-				return err
-			}
-			if err := articleTagRefModel.deleteArticleTagRefs(ArticleTagRefCondition{ArticleIds: articleIds}, tx); err != nil {
-				return err
-			}
-			return nil
-		})
-	} else {
-		articleModel.deleteArticles(condition, keyword, hardDel, nil)
+func DeleteArticles(condition ArticleCondition, keyword string) error {
+	articles, _ := articleModel.getArticles(condition, keyword, nil)
+	articleIds := []int{}
+	for _, article := range articles {
+		articleIds = append(articleIds, article.Id)
 	}
+	return db.Transaction(func(tx *gorm.DB) error {
+		if err := articleModel.deleteArticles(condition, keyword, tx); err != nil {
+			return err
+		}
+		if err := articleTagRefModel.deleteArticleTagRefs(ArticleTagRefCondition{ArticleIds: articleIds}, tx); err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func GetTags(condition TagCondition, keyword string, p *pagination.Pagination, articleIds []int) (tags []Tag, count int64) {

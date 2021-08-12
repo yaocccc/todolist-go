@@ -39,6 +39,9 @@ func (m ArticleTagRefModel) getArticleTagRefs(condition ArticleTagRefCondition) 
 }
 
 func (m ArticleTagRefModel) createArticleTagRefs(article_tag_refs []*ArticleTagRef, tx *gorm.DB) error {
+	if article_tag_refs == nil || len(article_tag_refs) == 0 {
+		return nil
+	}
 	query := getTxOrDb(tx)
 	return query.Create(article_tag_refs).Error
 }
