@@ -2,6 +2,24 @@
 
 基于golang写的一个todolist后端demo项目
 
+## 阶段目标
+
+> - [x] 基础WEB服务功能
+> - [x] JSON解析相关
+> - [x] 参数校验
+> - [x] 请求中间件
+> - [x] 请求追踪
+> - [x] ORM增删改查功能
+> - [x] ORM结合WEB服务
+> - [ ] 全局错误处理
+> - [ ] SWAGGER swaggo
+> - [ ] REDIS能力
+> - [ ] MONGO能力
+> - [ ] KAFKA能力
+> - [ ] GRPC能力
+> - [ ] 包管理
+> - [ ] 部署
+
 ## 项目结构
 
 ```plaintext
