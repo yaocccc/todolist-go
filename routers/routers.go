@@ -11,15 +11,15 @@ var apimap = make(map[string]gin.HandlerFunc)
 func Router(r *gin.Engine) {
 	articleApis := apis.ArticleApis{}
 	apimap["GetArticles"] = articleApis.GetArticles
-	apimap["CreateArticle"] = articleApis.CreateArticle
-	apimap["UpdateArticle"] = articleApis.UpdateArticle
+	apimap["CreateArticles"] = articleApis.CreateArticles
+	apimap["UpdateArticles"] = articleApis.UpdateArticles
 	apimap["DeleteArticles"] = articleApis.DeleteArticles
 
 	tagApis := apis.TagApis{}
 	apimap["GetTags"] = tagApis.GetTags
-	apimap["CreateTag"] = tagApis.CreateTag
-	apimap["UpdateTag"] = tagApis.UpdateTag
-	apimap["DeleteTag"] = tagApis.DeleteTag
+	apimap["CreateTags"] = tagApis.CreateTags
+	apimap["UpdateTags"] = tagApis.UpdateTags
+	apimap["DeleteTags"] = tagApis.DeleteTags
 
 	r.POST("", func(c *gin.Context) {
 		action := c.Query("Action")

@@ -47,13 +47,7 @@ func (m TagModel) createTags(tags []*Tag, tx *gorm.DB) error {
 	return query.Create(tags).Error
 }
 
-func (m TagModel) updateTags(condition TagCondition, keyword string, updation Tag, tx *gorm.DB) error {
-	query := getTxOrDb(tx)
-	query = makeTagQuery(query, condition, keyword)
-	return query.Updates(updation).Error
-}
-
-func (m TagModel) updateTagsByEntities(tags []*Tag, tx *gorm.DB) error {
+func (m TagModel) updateTags(tags []Tag, tx *gorm.DB) error {
 	if tags == nil || len(tags) == 0 {
 		return nil
 	}

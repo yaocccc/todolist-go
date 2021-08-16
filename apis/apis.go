@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"net/http"
 	"todo/utils"
 
 	"github.com/gin-gonic/gin"
@@ -37,4 +38,15 @@ func (a *Api) Info(message ...interface{}) {
 
 func (a *Api) Error(message ...interface{}) {
 	utils.Logger(a.RequestUuid, "ERROR", message...)
+}
+
+func (a *Api) ResJson(obj interface{}, err error) {
+	if err == nil {
+		a.Context.JSON(http.StatusOK, obj)
+	} else {
+		a.Context.JSON(500, gin.H{
+			"code":    500,
+			"message": err,
+		})
+	}
 }

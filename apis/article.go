@@ -1,7 +1,7 @@
 package apis
 
 import (
-	"fmt"
+	"time"
 	"todo/models"
 
 	"github.com/gin-gonic/gin"
@@ -11,40 +11,53 @@ type ArticleApis struct {
 	Api
 }
 
+type ArticleCondition struct {
+	Ids         []int `json:"ids"`
+	Types       []int `json:"types"`
+	Statuses    []int `json:"statuses"`
+	TagIds      []int `json:"tag_ids"`
+	CreatedTime []int `json:"created_time"`
+	IsDeleteds  []int `json:"is_deleteds"`
+}
+
+type ArticleCreation struct {
+	Type    *int    `json:"type" binding:"required"`
+	Status  *int    `json:"status" binding:"required"`
+	Title   *string `json:"title" binding:"required"`
+	Content *string `json:"content" binding:"required"`
+	TagIds  []int   `json:"tag_ids" binding:"required"`
+}
+
+type ArticleUpdation struct {
+	Id        *int    `json:"id" binding:"required"`
+	Status    *int    `json:"status"`
+	Title     *string `json:"title"`
+	Content   *string `json:"content"`
+	TagIds    []int   `json:"tag_ids"`
+	IsDeleted *int    `json:"is_deleted"`
+}
+
 type GetArticlesReq struct {
-	Ids         []int  `json:"ids"`
-	Types       []int  `json:"types"`
-	Statuses    []int  `json:"statuses"`
-	TagIds      []int  `json:"tag_ids"`
-	CreatedTime []int  `json:"created_time"`
-	IsDeleteds  []int  `json:"is_deleteds"`
-	Keyword     string `json:"keyword"`
+	Condition ArticleCondition `json:"condition" binding:"required"`
+	Keyword   *string          `json:"keyword" binding:"required"`
+}
+
+type CreateArticleReq struct {
+	Creations []ArticleCreation `json:"creations" binding:"required"`
+}
+
+type UpdateArticleReq struct {
+	Updations []ArticleUpdation `json:"updations" binding:"required"`
+}
+
+type DeleteArticlesReq struct {
+	Condition ArticleCondition `json:"condition" binding:"required"`
+	Keyword   *string          `json:"keyword" binding:"required"`
 }
 
 type ResArticle struct {
 	models.Article
 	Tags []models.Tag `json:"tags"`
-}
-
-type CreateArticleReq struct {
-	Type    int    `json:"type" binding:"required"`
-	Status  int    `json:"status"`
-	Title   string `json:"title" binding:"required"`
-	Content string `json:"content" binding:"required"`
-	TagIds  []int  `json:"tag_ids" binding:"required"`
-}
-
-type UpdateArticleReq struct {
-	Id        int    `json:"id" binding:"required"`
-	Status    int    `json:"status"`
-	Title     string `json:"title"`
-	Content   string `json:"content"`
-	TagIds    []int  `json:"tag_ids"`
-	IsDeleted int    `json:"is_deleted"`
-}
-
-type DeleteArticlesReq struct {
-	Ids []int `json:"ids" binding:"required"`
 }
 
 func (a *ArticleApis) GetArticles(c *gin.Context) {
@@ -56,13 +69,13 @@ func (a *ArticleApis) GetArticles(c *gin.Context) {
 
 	/** GET ARTICLES */
 	articleCondition := models.ArticleCondition{
-		Ids:         body.Ids,
-		Types:       body.Types,
-		Statuses:    body.Statuses,
-		CreatedTime: body.CreatedTime,
-		IsDeleteds:  body.IsDeleteds,
+		Ids:         body.Condition.Ids,
+		Types:       body.Condition.Types,
+		Statuses:    body.Condition.Statuses,
+		CreatedTime: body.Condition.CreatedTime,
+		IsDeleteds:  body.Condition.IsDeleteds,
 	}
-	articles, count := models.GetArticles(articleCondition, body.Keyword, nil, body.TagIds)
+	articles, count := models.GetArticles(articleCondition, *body.Keyword, nil, body.Condition.TagIds)
 
 	/** GET TAGS */
 	articleIds := []int{}
@@ -104,67 +117,105 @@ func (a *ArticleApis) GetArticles(c *gin.Context) {
 		data = append(data, tempRes)
 	}
 
-	c.JSON(200, gin.H{
+	a.ResJson(gin.H{
 		"code":    0,
 		"message": "success",
 		"data":    data,
 		"count":   count,
-	})
+	}, nil)
 }
 
-func (a *ArticleApis) CreateArticle(c *gin.Context) {
+func (a *ArticleApis) CreateArticles(c *gin.Context) {
 	a.MakeContext(c)
 	body := CreateArticleReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
 
-	/** CREATE ARTICLE */
-	article := models.Article{
-		Type:    body.Type,
-		Status:  body.Status,
-		Title:   body.Title,
-		Content: body.Content,
-	}
-	models.CreateArticle(&article, body.TagIds)
-	tags, _ := models.GetTags(models.TagCondition{}, "", nil, []int{article.Id})
-
-	c.JSON(200, gin.H{
-		"code":    0,
-		"message": "success",
-		"data": ResArticle{
+	/** CREATE ARTICLES */
+	creations := []*models.ArticleCreation{}
+	for _, creation := range body.Creations {
+		article := models.Article{
+			Type:    *creation.Type,
+			Status:  *creation.Status,
+			Title:   *creation.Title,
+			Content: *creation.Content,
+		}
+		creations = append(creations, &models.ArticleCreation{
 			Article: article,
-			Tags:    tags,
-		},
-		"count": 1,
-	})
+			TagIds:  creation.TagIds,
+		})
+	}
+
+	if err := models.CreateArticles(creations); err == nil {
+		articleIds := []int{}
+		for _, article := range creations {
+			articleIds = append(articleIds, article.Id)
+		}
+
+		a.ResJson(gin.H{
+			"code":    0,
+			"message": "success",
+			"data":    articleIds,
+		}, nil)
+	} else {
+		a.ResJson(nil, err)
+	}
+
 }
 
-func (a *ArticleApis) UpdateArticle(c *gin.Context) {
+func (a *ArticleApis) UpdateArticles(c *gin.Context) {
 	a.MakeContext(c)
 	body := UpdateArticleReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
-	article := models.Article{}
-	article.Id = body.Id
-	article.Title = body.Title
-	article.Content = body.Content
-	article.Status = body.Status
-	article.IsDeleted = body.IsDeleted
-	fmt.Printf("[logger-body.IsDeleted ]: %+v %+v\n", body.IsDeleted, body.IsDeleted == 0)
 
-	if err := models.UpdateArticle(article, body.TagIds); err == nil {
-		c.JSON(200, gin.H{
-			"code":    0,
-			"message": "success",
-		})
-	} else {
-		c.JSON(500, gin.H{
-			"code":    500,
-			"message": err,
-		})
+	updations := []models.ArticleUpdation{}
+
+	articleIds := []int{}
+	updationById := make(map[int]ArticleUpdation)
+	for _, updation := range body.Updations {
+		articleIds = append(articleIds, *updation.Id)
+		updationById[*updation.Id] = updation
 	}
+
+	/** TODO: gorm直接save会把空值默认设置回去 需要寻找更优雅的解决方法 而不是先查出来再覆盖上去 */
+	articles, _ := models.GetArticles(models.ArticleCondition{Ids: articleIds}, "", nil, nil)
+	now := time.Now().Unix()
+	for _, article := range articles {
+		updation, ok := updationById[article.Id]
+		if ok {
+			if updation.Title != nil {
+				article.Title = *updation.Title
+			}
+			if updation.Content != nil {
+				article.Content = *updation.Content
+			}
+			if updation.Status != nil {
+				if *updation.IsDeleted == 1 && article.Status == 0 {
+					article.CompletedTime = now
+				}
+				article.Status = *updation.Status
+			}
+			if updation.IsDeleted != nil {
+				if *updation.IsDeleted == 1 && article.IsDeleted == 0 {
+					article.DeletedTime = now
+				}
+				article.IsDeleted = *updation.IsDeleted
+			}
+			updations = append(updations, models.ArticleUpdation{
+				Article: article,
+				TagIds:  updation.TagIds,
+			})
+		}
+	}
+
+	err := models.UpdateArticles(updations)
+	a.ResJson(gin.H{
+		"code":    0,
+		"message": "success",
+	}, err)
 }
 
 func (a *ArticleApis) DeleteArticles(c *gin.Context) {
@@ -173,13 +224,19 @@ func (a *ArticleApis) DeleteArticles(c *gin.Context) {
 	if a.MakeBody(&body) != nil {
 		return
 	}
-	articleCondition := models.ArticleCondition{}
-	articleCondition.Ids = body.Ids
 
-	models.DeleteArticles(articleCondition, "")
+	articleCondition := models.ArticleCondition{
+		Ids:         body.Condition.Ids,
+		Types:       body.Condition.Types,
+		Statuses:    body.Condition.Statuses,
+		CreatedTime: body.Condition.CreatedTime,
+		IsDeleteds:  body.Condition.IsDeleteds,
+	}
 
-	c.JSON(200, gin.H{
+	err := models.DeleteArticles(articleCondition, *body.Keyword)
+
+	a.ResJson(gin.H{
 		"code":    0,
 		"message": "success",
-	})
+	}, err)
 }

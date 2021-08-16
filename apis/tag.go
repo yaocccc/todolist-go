@@ -10,23 +10,37 @@ type TagApis struct {
 	Api
 }
 
+type TagCondition struct {
+	Ids []int `json:"ids"`
+}
+
+type TagCreation struct {
+	Name        *string `json:"name" binding:"required"`
+	Description *string `json:"description" binding:"required"`
+}
+
+type TagUpdation struct {
+	Id          int     `json:"id" binding:"required"`
+	Name        *string `json:"name"`
+	Description *string `json:"description"`
+}
+
 type GetTagsReq struct {
-	Keyword string `json:"keyword"`
+	Condition TagCondition `json:"condition" binding:"required"`
+	Keyword   *string      `json:"keyword" binding:"required"`
 }
 
 type CreateTagReq struct {
-	Name        string `json:"name" binding:"required"`
-	Description string `json:"description" binding:"required"`
+	Creations []TagCreation `json:"creations" binding:"required"`
 }
 
 type UpdateTagReq struct {
-	Id          int    `json:"id" binding:"required"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Updations []TagUpdation `json:"updations" binding:"required"`
 }
 
 type DeleteTagsReq struct {
-	Ids []int `json:"ids" binding:"required"`
+	Condition TagCondition `json:"condition" binding:"required"`
+	Keyword   *string      `json:"keyword" binding:"required"`
 }
 
 func (a *TagApis) GetTags(c *gin.Context) {
@@ -37,67 +51,94 @@ func (a *TagApis) GetTags(c *gin.Context) {
 	}
 
 	condition := models.TagCondition{}
-	tags, count := models.GetTags(condition, body.Keyword, nil, nil)
+	tags, count := models.GetTags(condition, *body.Keyword, nil, nil)
 
-	c.JSON(200, gin.H{
+	a.ResJson(gin.H{
 		"code":    0,
 		"message": "success",
 		"data":    tags,
 		"count":   count,
-	})
+	}, nil)
 }
 
-func (a *TagApis) CreateTag(c *gin.Context) {
+func (a *TagApis) CreateTags(c *gin.Context) {
 	a.MakeContext(c)
 	body := CreateTagReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
 
-	tag := models.Tag{
-		Name:        body.Name,
-		Description: body.Description,
+	tags := []*models.Tag{}
+	for _, creation := range body.Creations {
+		tag := models.Tag{
+			Name:        *creation.Name,
+			Description: *creation.Description,
+		}
+		tags = append(tags, &tag)
 	}
-	models.CreateTags([]*models.Tag{&tag})
+	err := models.CreateTags(tags)
 
-	c.JSON(200, gin.H{
+	a.ResJson(gin.H{
 		"code":    0,
 		"message": "success",
-		"data":    tag,
-		"count":   1,
-	})
+		"data":    tags,
+	}, err)
 }
 
-func (a *TagApis) UpdateTag(c *gin.Context) {
+func (a *TagApis) UpdateTags(c *gin.Context) {
 	a.MakeContext(c)
 	body := UpdateTagReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
-	condition := models.TagCondition{Ids: []int{body.Id}}
-	updation := models.Tag{
-		Name:        body.Name,
-		Description: body.Description,
+
+	updations := []models.Tag{}
+
+	tagIds := []int{}
+	for _, updation := range body.Updations {
+		tagIds = append(tagIds, updation.Id)
 	}
-	models.UpdateTags(condition, "", updation)
-	c.JSON(200, gin.H{
+
+	tags, _ := models.GetTags(models.TagCondition{Ids: tagIds}, "", nil, nil)
+	tagById := make(map[int]models.Tag)
+	for _, tag := range tags {
+		tagById[tag.Id] = tag
+	}
+	for _, updation := range body.Updations {
+		tag, ok := tagById[updation.Id]
+		if ok {
+			if updation.Name != nil {
+				tag.Name = *updation.Name
+			}
+			if updation.Description != nil {
+				tag.Description = *updation.Description
+			}
+		}
+		updations = append(updations, tag)
+	}
+
+	err := models.UpdateTags(updations)
+
+	a.ResJson(gin.H{
 		"code":    0,
 		"message": "success",
-	})
+	}, err)
 }
 
-func (a *TagApis) DeleteTag(c *gin.Context) {
+func (a *TagApis) DeleteTags(c *gin.Context) {
 	a.MakeContext(c)
 	body := DeleteTagsReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
-	tagCondition := models.TagCondition{Ids: body.Ids}
+	condition := models.TagCondition{
+		Ids: body.Condition.Ids,
+	}
 
-	models.DeleteTags(tagCondition, "")
+	err := models.DeleteTags(condition, *body.Keyword)
 
-	c.JSON(200, gin.H{
+	a.ResJson(gin.H{
 		"code":    0,
 		"message": "success",
-	})
+	}, err)
 }
