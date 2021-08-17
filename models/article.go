@@ -71,13 +71,13 @@ func (m ArticleModel) createArticles(articles []*Article, tx *gorm.DB) error {
 	}
 	now := time.Now().Unix()
 	for _, article := range articles {
-		article.CompletedTime = now
+		article.CreatedTime = now
 	}
 	query := getTxOrDb(tx)
 	return query.Create(articles).Error
 }
 
-func (m ArticleModel) updateArticles(articles []Article, tx *gorm.DB) error {
+func (m ArticleModel) updateArticles(articles []*Article, tx *gorm.DB) error {
 	if articles == nil || len(articles) == 0 {
 		return nil
 	}

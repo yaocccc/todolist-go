@@ -50,7 +50,7 @@ func (a *TagApis) GetTags(c *gin.Context) {
 		return
 	}
 
-	condition := models.TagCondition{}
+	condition := models.TagCondition{Ids: body.Condition.Ids}
 	tags, count := models.GetTags(condition, *body.Keyword, nil, nil)
 
 	a.ResJson(gin.H{
@@ -76,13 +76,19 @@ func (a *TagApis) CreateTags(c *gin.Context) {
 		}
 		tags = append(tags, &tag)
 	}
-	err := models.CreateTags(tags)
-
-	a.ResJson(gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    tags,
-	}, err)
+	if err := models.CreateTags(tags); err == nil {
+		tagIds := []int{}
+		for _, tag := range tags {
+			tagIds = append(tagIds, tag.Id)
+		}
+		a.ResJson(gin.H{
+			"code":    0,
+			"message": "success",
+			"data":    tagIds,
+		}, nil)
+	} else {
+		a.ResJson(nil, err)
+	}
 }
 
 func (a *TagApis) UpdateTags(c *gin.Context) {

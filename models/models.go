@@ -7,6 +7,7 @@ import (
 	"todo/types/pagination"
 	"todo/utils"
 
+	"github.com/chenhg5/collection"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -53,7 +54,7 @@ func GetArticles(condition ArticleCondition, keyword string, p *pagination.Pagin
 		for _, ref := range refs {
 			condition.Ids = append(condition.Ids, ref.ArticleId)
 		}
-		condition.Ids = utils.UniqInts(condition.Ids)
+		condition.Ids = collection.Collect(condition.Ids).Unique().ToIntArray()
 	}
 	articles, count = articleModel.getArticles(condition, keyword, p)
 	return
@@ -83,10 +84,10 @@ func CreateArticles(creations []*ArticleCreation) error {
 }
 
 func UpdateArticles(updations []ArticleUpdation) error {
-	articles := []Article{}
+	articles := []*Article{}
 	articleIds := []int{}
 	for _, updation := range updations {
-		articles = append(articles, updation.Article)
+		articles = append(articles, &updation.Article)
 		articleIds = append(articleIds, updation.Id)
 	}
 
@@ -99,13 +100,15 @@ func UpdateArticles(updations []ArticleUpdation) error {
 	}
 	for _, updation := range updations {
 		if updation.TagIds != nil {
+			updationMapByKey := make(map[string]bool) /** key: articleId-tagId */
 			for _, tagId := range updation.TagIds {
+				updationMapByKey[fmt.Sprintf("%d-%d", updation.Id, tagId)] = true
 				if _, ok := refMapByKey[fmt.Sprintf("%d-%d", updation.Id, tagId)]; !ok {
 					toCreateRefs = append(toCreateRefs, &ArticleTagRef{ArticleId: updation.Id, TagId: tagId})
 				}
 			}
 			for _, ref := range refs {
-				if _, ok := refMapByKey[fmt.Sprintf("%d-%d", ref.ArticleId, ref.TagId)]; !ok {
+				if _, ok := updationMapByKey[fmt.Sprintf("%d-%d", ref.ArticleId, ref.TagId)]; !ok {
 					toDeleteRefsCondition.Ids = append(toDeleteRefsCondition.Ids, ref.Id)
 				}
 			}
@@ -153,7 +156,7 @@ func GetTags(condition TagCondition, keyword string, p *pagination.Pagination, a
 		for _, ref := range refs {
 			condition.Ids = append(condition.Ids, ref.TagId)
 		}
-		condition.Ids = utils.UniqInts(condition.Ids)
+		condition.Ids = collection.Collect(condition.Ids).Unique().ToIntArray()
 	}
 	tags, count = tagModel.getTags(condition, keyword, p)
 	return

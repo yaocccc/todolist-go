@@ -1,3 +1,5 @@
+drop database todo;
+
 create database todo;
 
 CREATE TABLE `todo`.`articles` (

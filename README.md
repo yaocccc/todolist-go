@@ -11,6 +11,7 @@
 > - [x] 请求追踪
 > - [x] ORM增删改查功能
 > - [x] ORM结合WEB服务
+> - [ ] 追踪ORM日志
 > - [ ] 全局错误处理
 > - [ ] SWAGGER swaggo
 > - [ ] REDIS能力

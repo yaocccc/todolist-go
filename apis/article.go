@@ -181,7 +181,7 @@ func (a *ArticleApis) UpdateArticles(c *gin.Context) {
 	}
 
 	/** TODO: gorm直接save会把空值默认设置回去 需要寻找更优雅的解决方法 而不是先查出来再覆盖上去 */
-	articles, _ := models.GetArticles(models.ArticleCondition{Ids: articleIds}, "", nil, nil)
+	articles, _ := models.GetArticles(models.ArticleCondition{Ids: articleIds, IsDeleteds: []int{0, 1}}, "", nil, nil)
 	now := time.Now().Unix()
 	for _, article := range articles {
 		updation, ok := updationById[article.Id]
