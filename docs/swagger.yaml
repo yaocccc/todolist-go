@@ -1,0 +1,50 @@
+definitions:
+  apis.ArticleCondition:
+    properties:
+      created_time:
+        items:
+          type: integer
+        type: array
+      ids:
+        items:
+          type: integer
+        type: array
+      is_deleteds:
+        items:
+          type: integer
+        type: array
+      statuses:
+        items:
+          type: integer
+        type: array
+      tag_ids:
+        items:
+          type: integer
+        type: array
+      types:
+        items:
+          type: integer
+        type: array
+    type: object
+  apis.GetArticlesReq:
+    properties:
+      condition:
+        $ref: '#/definitions/apis.ArticleCondition'
+      keyword:
+        type: string
+    required:
+    - condition
+    - keyword
+    type: object
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: TODO LIST API
+paths: {}
+swagger: "2.0"

@@ -60,6 +60,13 @@ type ResArticle struct {
 	Tags []models.Tag `json:"tags"`
 }
 
+// @Summary get articles by condition
+// @Description get articles
+// @Accept  json
+// @Produce  json
+// @Body {object} GetArticlesReq
+// @Success 200 {object} GetArticlesReq
+// @Param default query string false "string default" default(A)
 func (a *ArticleApis) GetArticles(c *gin.Context) {
 	a.MakeContext(c)
 	body := GetArticlesReq{}
@@ -67,6 +74,7 @@ func (a *ArticleApis) GetArticles(c *gin.Context) {
 		return
 	}
 
+	a.Info("TETETETETETTE")
 	/** GET ARTICLES */
 	articleCondition := models.ArticleCondition{
 		Ids:         body.Condition.Ids,

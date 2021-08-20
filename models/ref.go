@@ -7,9 +7,9 @@ import (
 type ArticleTagRefModel struct{}
 
 type ArticleTagRef struct {
-	Id        int `json:"id" gorm:"primaryKey;autoIncrement"`
-	ArticleId int `json:"article_id" gorm:"default=0"`
-	TagId     int `json:"tag_id" gorm:"default=0"`
+	Id        int `json:"id"`
+	ArticleId int `json:"article_id"`
+	TagId     int `json:"tag_id"`
 }
 
 type ArticleTagRefCondition struct {

@@ -10,9 +10,9 @@ import (
 type TagModel struct{}
 
 type Tag struct {
-	Id          int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	Name        string `json:"name" gorm:"default=''"`
-	Description string `json:"description" gorm:"default=''"`
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 type TagCondition struct {

@@ -11,16 +11,16 @@ import (
 type ArticleModel struct{}
 
 type Article struct {
-	Id            int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	Type          int    `json:"type" gorm:"default=1"`
-	Status        int    `json:"status" gorm:"default=0"`
-	Title         string `json:"title" gorm:"default=''"`
-	Content       string `json:"content" gorm:"default=''"`
-	CreatedTime   int64  `json:"created_time" gorm:"default=0"`
-	UpdatedTime   int64  `json:"updated_time" gorm:"default=0"`
-	CompletedTime int64  `json:"completed_time" gorm:"default=0"`
-	DeletedTime   int64  `json:"deleted_time" gorm:"default=0"`
-	IsDeleted     int    `json:"is_deleted" gorm:"default=0"`
+	Id            int    `json:"id"`
+	Type          int    `json:"type"`
+	Status        int    `json:"status"`
+	Title         string `json:"title"`
+	Content       string `json:"content"`
+	CreatedTime   int64  `json:"created_time"`
+	UpdatedTime   int64  `json:"updated_time"`
+	CompletedTime int64  `json:"completed_time"`
+	DeletedTime   int64  `json:"deleted_time"`
+	IsDeleted     int    `json:"is_deleted"`
 }
 
 type ArticleCondition struct {
