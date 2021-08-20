@@ -30,19 +30,18 @@ type GetTagsReq struct {
 	Keyword   *string      `json:"keyword" binding:"required"`
 }
 
-type CreateTagReq struct {
-	Creations []TagCreation `json:"creations" binding:"required"`
+type GetTagsRes struct {
+	CommonRes
+	Data  []models.Tag `json:"data"`
+	Count int          `json:"count"`
 }
 
-type UpdateTagReq struct {
-	Updations []TagUpdation `json:"updations" binding:"required"`
-}
-
-type DeleteTagsReq struct {
-	Condition TagCondition `json:"condition" binding:"required"`
-	Keyword   *string      `json:"keyword" binding:"required"`
-}
-
+// @Tags TAG
+// @Summary Get tags by condition
+// @Description Get tags
+// @Body {object} GetTagsReq
+// @Success 200 {object} GetTagsRes
+// @Router /GetTags [post]
 func (a *TagApis) GetTags(c *gin.Context) {
 	a.MakeContext(c)
 	body := GetTagsReq{}
@@ -61,9 +60,24 @@ func (a *TagApis) GetTags(c *gin.Context) {
 	}, nil)
 }
 
+type CreateTagsReq struct {
+	Creations []TagCreation `json:"creations" binding:"required"`
+}
+
+type CreateTagsRes struct {
+	CommonRes
+	Data []int `json:"data"`
+}
+
+// @Tags TAG
+// @Summary Create tags by creations
+// @Description Create tags
+// @Body {object} CreateTagsReq
+// @Success 200 {object} CreateTagsRes
+// @Router /CreateTags [post]
 func (a *TagApis) CreateTags(c *gin.Context) {
 	a.MakeContext(c)
-	body := CreateTagReq{}
+	body := CreateTagsReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
@@ -91,9 +105,23 @@ func (a *TagApis) CreateTags(c *gin.Context) {
 	}
 }
 
+type UpdateTagsReq struct {
+	Updations []TagUpdation `json:"updations" binding:"required"`
+}
+
+type UpdateTagsRes struct {
+	CommonRes
+}
+
+// @Tags TAG
+// @Summary Update tags by updations
+// @Description Update tags
+// @Body {object} UpdateTagsReq
+// @Success 200 {object} UpdateTagsRes
+// @Router /UpdateTags [post]
 func (a *TagApis) UpdateTags(c *gin.Context) {
 	a.MakeContext(c)
-	body := UpdateTagReq{}
+	body := UpdateTagsReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
@@ -131,6 +159,21 @@ func (a *TagApis) UpdateTags(c *gin.Context) {
 	}, err)
 }
 
+type DeleteTagsReq struct {
+	Condition TagCondition `json:"condition" binding:"required"`
+	Keyword   *string      `json:"keyword" binding:"required"`
+}
+
+type DeleteTagsRes struct {
+	CommonRes
+}
+
+// @Tags TAG
+// @Summary Delete tags by condition
+// @Description Delete tags
+// @Body {object} DeleteTagsReq
+// @Success 200 {object} DeleteTagsRes
+// @Router /DeleteTags [post]
 func (a *TagApis) DeleteTags(c *gin.Context) {
 	a.MakeContext(c)
 	body := DeleteTagsReq{}

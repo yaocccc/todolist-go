@@ -37,36 +37,28 @@ type ArticleUpdation struct {
 	IsDeleted *int    `json:"is_deleted"`
 }
 
-type GetArticlesReq struct {
-	Condition ArticleCondition `json:"condition" binding:"required"`
-	Keyword   *string          `json:"keyword" binding:"required"`
-}
-
-type CreateArticleReq struct {
-	Creations []ArticleCreation `json:"creations" binding:"required"`
-}
-
-type UpdateArticleReq struct {
-	Updations []ArticleUpdation `json:"updations" binding:"required"`
-}
-
-type DeleteArticlesReq struct {
-	Condition ArticleCondition `json:"condition" binding:"required"`
-	Keyword   *string          `json:"keyword" binding:"required"`
-}
-
 type ResArticle struct {
 	models.Article
 	Tags []models.Tag `json:"tags"`
 }
 
-// @Summary get articles by condition
-// @Description get articles
-// @Accept  json
-// @Produce  json
+type GetArticlesReq struct {
+	Condition ArticleCondition `json:"condition" binding:"required"`
+	Keyword   *string          `json:"keyword" binding:"required"`
+}
+
+type GetArticlesRes struct {
+	CommonRes
+	Data  []ResArticle `json:"data"`
+	Count int          `json:"count"`
+}
+
+// @Tags ARTICLE
+// @Summary Get articles by condition
+// @Description Get articles
 // @Body {object} GetArticlesReq
-// @Success 200 {object} GetArticlesReq
-// @Param default query string false "string default" default(A)
+// @Success 200 {object} GetArticlesRes
+// @Router /GetArticles [post]
 func (a *ArticleApis) GetArticles(c *gin.Context) {
 	a.MakeContext(c)
 	body := GetArticlesReq{}
@@ -74,7 +66,6 @@ func (a *ArticleApis) GetArticles(c *gin.Context) {
 		return
 	}
 
-	a.Info("TETETETETETTE")
 	/** GET ARTICLES */
 	articleCondition := models.ArticleCondition{
 		Ids:         body.Condition.Ids,
@@ -133,9 +124,24 @@ func (a *ArticleApis) GetArticles(c *gin.Context) {
 	}, nil)
 }
 
+type CreateArticlesReq struct {
+	Creations []ArticleCreation `json:"creations" binding:"required"`
+}
+
+type CreateArticlesRes struct {
+	CommonRes
+	Data []int `json:"data"`
+}
+
+// @Tags ARTICLE
+// @Summary Create articles by creations
+// @Description Create articles
+// @Body {object} CreateArticlesReq
+// @Success 200 {object} CreateArticlesRes
+// @Router /CreateArticles [post]
 func (a *ArticleApis) CreateArticles(c *gin.Context) {
 	a.MakeContext(c)
-	body := CreateArticleReq{}
+	body := CreateArticlesReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
@@ -172,9 +178,23 @@ func (a *ArticleApis) CreateArticles(c *gin.Context) {
 
 }
 
+type UpdateArticlesReq struct {
+	Updations []ArticleUpdation `json:"updations" binding:"required"`
+}
+
+type UpdateArticlesRes struct {
+	CommonRes
+}
+
+// @Tags ARTICLE
+// @Summary Update articles by updations
+// @Description Update articles
+// @Body {object} UpdateArticlesReq
+// @Success 200 {object} UpdateArticlesRes
+// @Router /UpdateArticles [post]
 func (a *ArticleApis) UpdateArticles(c *gin.Context) {
 	a.MakeContext(c)
-	body := UpdateArticleReq{}
+	body := UpdateArticlesReq{}
 	if a.MakeBody(&body) != nil {
 		return
 	}
@@ -226,6 +246,21 @@ func (a *ArticleApis) UpdateArticles(c *gin.Context) {
 	}, err)
 }
 
+type DeleteArticlesReq struct {
+	Condition ArticleCondition `json:"condition" binding:"required"`
+	Keyword   *string          `json:"keyword" binding:"required"`
+}
+
+type DeleteArticlesRes struct {
+	CommonRes
+}
+
+// @Tags ARTICLE
+// @Summary Delete articles by condition
+// @Description Delete articles
+// @Body {object} DeleteArticlesReq
+// @Success 200 {object} DeleteArticlesRes
+// @Router /DeleteArticles [post]
 func (a *ArticleApis) DeleteArticles(c *gin.Context) {
 	a.MakeContext(c)
 	body := DeleteArticlesReq{}

@@ -1,40 +1,115 @@
 definitions:
-  apis.ArticleCondition:
+  apis.CreateArticlesRes:
     properties:
-      created_time:
+      code:
+        type: integer
+      data:
         items:
           type: integer
         type: array
-      ids:
-        items:
-          type: integer
-        type: array
-      is_deleteds:
-        items:
-          type: integer
-        type: array
-      statuses:
-        items:
-          type: integer
-        type: array
-      tag_ids:
-        items:
-          type: integer
-        type: array
-      types:
-        items:
-          type: integer
-        type: array
-    type: object
-  apis.GetArticlesReq:
-    properties:
-      condition:
-        $ref: '#/definitions/apis.ArticleCondition'
-      keyword:
+      message:
         type: string
-    required:
-    - condition
-    - keyword
+    type: object
+  apis.CreateTagsRes:
+    properties:
+      code:
+        type: integer
+      data:
+        items:
+          type: integer
+        type: array
+      message:
+        type: string
+    type: object
+  apis.DeleteArticlesRes:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  apis.DeleteTagsRes:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  apis.GetArticlesRes:
+    properties:
+      code:
+        type: integer
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/apis.ResArticle'
+        type: array
+      message:
+        type: string
+    type: object
+  apis.GetTagsRes:
+    properties:
+      code:
+        type: integer
+      count:
+        type: integer
+      data:
+        items:
+          $ref: '#/definitions/models.Tag'
+        type: array
+      message:
+        type: string
+    type: object
+  apis.ResArticle:
+    properties:
+      completed_time:
+        type: integer
+      content:
+        type: string
+      created_time:
+        type: integer
+      deleted_time:
+        type: integer
+      id:
+        type: integer
+      is_deleted:
+        type: integer
+      status:
+        type: integer
+      tags:
+        items:
+          $ref: '#/definitions/models.Tag'
+        type: array
+      title:
+        type: string
+      type:
+        type: integer
+      updated_time:
+        type: integer
+    type: object
+  apis.UpdateArticlesRes:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  apis.UpdateTagsRes:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  models.Tag:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
     type: object
 info:
   contact:
@@ -46,5 +121,93 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
   title: TODO LIST API
-paths: {}
+paths:
+  /CreateArticles:
+    post:
+      description: Create articles
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.CreateArticlesRes'
+      summary: Create articles by creations
+      tags:
+      - ARTICLE
+  /CreateTags:
+    post:
+      description: Create tags
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.CreateTagsRes'
+      summary: Create tags by creations
+      tags:
+      - TAG
+  /DeleteArticles:
+    post:
+      description: Delete articles
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.DeleteArticlesRes'
+      summary: Delete articles by condition
+      tags:
+      - ARTICLE
+  /DeleteTags:
+    post:
+      description: Delete tags
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.DeleteTagsRes'
+      summary: Delete tags by condition
+      tags:
+      - TAG
+  /GetArticles:
+    post:
+      description: Get articles
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.GetArticlesRes'
+      summary: Get articles by condition
+      tags:
+      - ARTICLE
+  /GetTags:
+    post:
+      description: Get tags
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.GetTagsRes'
+      summary: Get tags by condition
+      tags:
+      - TAG
+  /UpdateArticles:
+    post:
+      description: Update articles
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.UpdateArticlesRes'
+      summary: Update articles by updations
+      tags:
+      - ARTICLE
+  /UpdateTags:
+    post:
+      description: Update tags
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/apis.UpdateTagsRes'
+      summary: Update tags by updations
+      tags:
+      - TAG
 swagger: "2.0"

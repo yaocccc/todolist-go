@@ -12,6 +12,11 @@ type Api struct {
 	Context     *gin.Context
 }
 
+type CommonRes struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
 func (a *Api) MakeContext(c *gin.Context) {
 	uid, _ := c.Get("RequestUuid")
 	a.Context = c

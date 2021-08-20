@@ -13,60 +13,314 @@
             "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
         }
     },
-    "paths": {},
-    "definitions": {
-        "apis.ArticleCondition": {
-            "type": "object",
-            "properties": {
-                "created_time": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "is_deleteds": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "statuses": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "tag_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
-                    }
-                },
-                "types": {
-                    "type": "array",
-                    "items": {
-                        "type": "integer"
+    "paths": {
+        "/CreateArticles": {
+            "post": {
+                "description": "Create articles",
+                "tags": [
+                    "ARTICLE"
+                ],
+                "summary": "Create articles by creations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.CreateArticlesRes"
+                        }
                     }
                 }
             }
         },
-        "apis.GetArticlesReq": {
+        "/CreateTags": {
+            "post": {
+                "description": "Create tags",
+                "tags": [
+                    "TAG"
+                ],
+                "summary": "Create tags by creations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.CreateTagsRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/DeleteArticles": {
+            "post": {
+                "description": "Delete articles",
+                "tags": [
+                    "ARTICLE"
+                ],
+                "summary": "Delete articles by condition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.DeleteArticlesRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/DeleteTags": {
+            "post": {
+                "description": "Delete tags",
+                "tags": [
+                    "TAG"
+                ],
+                "summary": "Delete tags by condition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.DeleteTagsRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/GetArticles": {
+            "post": {
+                "description": "Get articles",
+                "tags": [
+                    "ARTICLE"
+                ],
+                "summary": "Get articles by condition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.GetArticlesRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/GetTags": {
+            "post": {
+                "description": "Get tags",
+                "tags": [
+                    "TAG"
+                ],
+                "summary": "Get tags by condition",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.GetTagsRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/UpdateArticles": {
+            "post": {
+                "description": "Update articles",
+                "tags": [
+                    "ARTICLE"
+                ],
+                "summary": "Update articles by updations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.UpdateArticlesRes"
+                        }
+                    }
+                }
+            }
+        },
+        "/UpdateTags": {
+            "post": {
+                "description": "Update tags",
+                "tags": [
+                    "TAG"
+                ],
+                "summary": "Update tags by updations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/apis.UpdateTagsRes"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "apis.CreateArticlesRes": {
             "type": "object",
-            "required": [
-                "condition",
-                "keyword"
-            ],
             "properties": {
-                "condition": {
-                    "$ref": "#/definitions/apis.ArticleCondition"
+                "code": {
+                    "type": "integer"
                 },
-                "keyword": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.CreateTagsRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.DeleteArticlesRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.DeleteTagsRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.GetArticlesRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/apis.ResArticle"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.GetTagsRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "count": {
+                    "type": "integer"
+                },
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Tag"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.ResArticle": {
+            "type": "object",
+            "properties": {
+                "completed_time": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_time": {
+                    "type": "integer"
+                },
+                "deleted_time": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_deleted": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Tag"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "integer"
+                },
+                "updated_time": {
+                    "type": "integer"
+                }
+            }
+        },
+        "apis.UpdateArticlesRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "apis.UpdateTagsRes": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Tag": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
                     "type": "string"
                 }
             }

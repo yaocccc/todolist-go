@@ -13,7 +13,7 @@
 > - [x] ORM结合WEB服务
 > - [ ] 追踪ORM日志
 > - [ ] 全局错误处理
-> - [ ] SWAGGER swaggo
+> - [x] SWAGGER
 > - [ ] REDIS能力
 > - [ ] MONGO能力
 > - [ ] KAFKA能力
@@ -65,6 +65,13 @@
 ## 项目启动
 
 go run main.go
+
+## swagger文档
+
+```plaintext
+  重新生成: swag init
+  访问: http://localhost:9527/swagger/index.html#/
+```
 
 ## MYSQL表说明
 
