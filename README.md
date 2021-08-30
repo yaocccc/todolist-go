@@ -75,6 +75,34 @@ go run main.go
 
 ## MYSQL表说明
 
+- [表结构](./sql/tables.sql)
 - articles 文章表
 - tags 标签表
 - article_tag_refs 文章标签关联表(一个文章可以关联多个标签)
+
+## APIS
+
+```plaintext
+  GetArticles: 批量获取文章
+  CreateArticles: 批量创建文章
+  UpdateArticles: 批量更新文章
+  DeleteArticles: 批量删除文章
+  GetTags: 批量获取标签
+  CreateTags: 批量创建标签
+  UpdateTags: 批量更新标签
+  DeleteTags: 批量删除标签
+```
+
+## 状况
+
+```plaintext
+  实现文章和标签相关的API和MYSQL DB操作 并能实现对应业务逻辑
+  swagger文档实现情况ok
+  无mongo redis kafka逻辑
+  无用户体系
+  无登录鉴权相关逻辑
+
+  API出入参 参数校验模糊
+  db操作不成规范和体系
+  较多的重复代码操作
+```
